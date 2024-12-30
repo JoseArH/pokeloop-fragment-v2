@@ -28,7 +28,7 @@ body {
 
 /* Header */
 header {
-background-color: rgba(69, 96, 117, 0.944);    
+background-color: rgba(74, 139, 161, 0.944);    
 color: var(--light-text);
     padding: 20px;
     border-radius: var(--border-radius);

@@ -19,6 +19,7 @@ function initAdminLoader() {
                         <div class="song-info">
                             <span class="song-name">${audio.name}</span>
                             <span class="game-name">${audio.game || 'Unknown Game'}</span>
+                            <span class="sample-rate">${audio.sampleRate || '44100'} Hz</span>
                         </div>
                         <div class="song-actions">
                             <button class="delete-button" data-id="${audio.id}">Delete</button>
@@ -65,13 +66,13 @@ function initAdminLoader() {
             });
     }
 
-    // Manejar subida de archivos
     uploadForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         const formData = new FormData();
         formData.append('audioFile', document.getElementById('audio-file').files[0]);
         formData.append('name', document.getElementById('song-name').value);
         formData.append('game', document.getElementById('game-name').value);
+        formData.append('sampleRate', document.getElementById('sample-rate').value);
         formData.append('startLoop', document.getElementById('upload-start-loop').value);
         formData.append('endLoop', document.getElementById('upload-end-loop').value);
 
@@ -87,6 +88,8 @@ function initAdminLoader() {
                 alert('Audio uploaded successfully');
                 updateSongList();
                 uploadForm.reset();
+                // Restaurar el valor por defecto del sample rate
+                document.getElementById('sample-rate').value = '44100';
             } else {
                 alert(`Failed to upload audio: ${data.message}`);
             }
