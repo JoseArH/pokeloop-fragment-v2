@@ -57,3 +57,7 @@ build/
 # Database files
 *.sqlite
 *.sqlite3
+
+# Audio files
+public/audio/
+uploads/audio/

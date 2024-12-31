@@ -1,9 +1,5 @@
 function initLoopHandler() {
     const { elements, audioState } = window;
-    
-    // Variables para controlar el timer
-    let pausedTimerRemaining = null;
-    let timerPausedAt = null;
 
     function samplesToSeconds(samples, samplingRate) {
         const safetyMargin = 0.05;
@@ -70,49 +66,32 @@ function initLoopHandler() {
         }
     }
 
-    function startTimer(resumeFromPause = false) {
+    function startTimer() {
         // Limpiar timer existente
         if (audioState.timerInterval) {
             clearInterval(audioState.timerInterval);
         }
 
-        // Si estamos resumiendo desde una pausa y tenemos tiempo restante guardado
-        if (resumeFromPause && pausedTimerRemaining) {
-            audioState.timerDuration = pausedTimerRemaining;
-            audioState.timerStartTime = Date.now() - (audioState.timerDuration - pausedTimerRemaining);
-        } else {
-            // Configurar nuevo timer
-            const minutes = parseInt(elements.timerSelect.value);
-            audioState.timerDuration = minutes * 60 * 1000; // Convertir a milisegundos
-            audioState.timerStartTime = Date.now();
-        }
+        // Configurar nuevo timer
+        const minutes = parseInt(elements.timerSelect.value);
+        audioState.timerDuration = minutes * 60 * 1000; // Convertir a milisegundos
+        audioState.timerStartTime = Date.now();
 
         // Iniciar intervalo de actualización
         audioState.timerInterval = setInterval(checkAndUpdateTimer, 1000);
         checkAndUpdateTimer(); // Actualización inicial inmediata
     }
 
-    function stopTimer(pause = false) {
+    function stopTimer() {
         if (audioState.timerInterval) {
             clearInterval(audioState.timerInterval);
             audioState.timerInterval = null;
         }
-
-        if (pause && audioState.timerStartTime && audioState.timerDuration) {
-            // Guardar el tiempo restante si es una pausa
-            const elapsed = Date.now() - audioState.timerStartTime;
-            pausedTimerRemaining = audioState.timerDuration - elapsed;
-            timerPausedAt = Date.now();
-        } else {
-            // Reset completo si no es una pausa
-            pausedTimerRemaining = null;
-            timerPausedAt = null;
-            audioState.timerStartTime = null;
-            audioState.timerDuration = null;
-        }
+        audioState.timerStartTime = null;
+        audioState.timerDuration = null;
 
         const timeRemainingElement = document.getElementById('time-remaining');
-        if (timeRemainingElement && !pause) {
+        if (timeRemainingElement) {
             timeRemainingElement.textContent = "--:--";
         }
     }
@@ -128,15 +107,13 @@ function initLoopHandler() {
     const originalStartPlayback = window.audioPlayerFunctions.startPlayback;
     window.audioPlayerFunctions.startPlayback = function(...args) {
         originalStartPlayback.apply(this, args);
-        if (elements.timerSelect.value !== "0") {
-            startTimer(true); // true indica que es una reanudación
-        }
+        startTimer();
     };
 
     const originalPausePlayback = window.audioPlayerFunctions.pausePlayback;
     window.audioPlayerFunctions.pausePlayback = function(...args) {
         originalPausePlayback.apply(this, args);
-        stopTimer(true); // true indica que es una pausa
+        stopTimer();
     };
 
     // Exportar funciones

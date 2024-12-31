@@ -62,7 +62,6 @@ function initAudioPlayer() {
                 elements.startLoopInput.value = info.startLoop;
                 elements.endLoopInput.value = info.endLoop;
                 console.log('Setting loop points:', info.startLoop, info.endLoop);
-                console.log('Using sample rate:', info.sampleRate);
             }
 
             startPlayback(0);
@@ -86,10 +85,10 @@ function initAudioPlayer() {
         audioState.audioSource.connect(audioState.gainNode);
         
         if (audioState.audioInfo && audioState.audioInfo.startLoop && audioState.audioInfo.endLoop) {
-            const sampleRate = audioState.audioInfo.sampleRate || audioState.audioBuffer.sampleRate;
+            const SAMPLE_RATE = 44100;
             
-            const startLoopTime = audioState.audioInfo.startLoop / sampleRate;
-            const endLoopTime = audioState.audioInfo.endLoop / sampleRate;
+            const startLoopTime = audioState.audioInfo.startLoop / SAMPLE_RATE;
+            const endLoopTime = audioState.audioInfo.endLoop / SAMPLE_RATE;
             
             audioState.audioSource.loop = true;
             audioState.audioSource.loopStart = startLoopTime;
@@ -105,7 +104,7 @@ function initAudioPlayer() {
                     end: endLoopTime
                 },
                 duration: audioState.audioBuffer.duration,
-                sampleRate: sampleRate
+                sampleRate: SAMPLE_RATE
             });
         }
     
@@ -129,9 +128,9 @@ function initAudioPlayer() {
             
             if (audioState.audioSource.loop && audioState.audioInfo && 
                 audioState.audioInfo.startLoop && audioState.audioInfo.endLoop) {
-                const sampleRate = audioState.audioInfo.sampleRate || audioState.audioBuffer.sampleRate;
-                const startLoopTime = audioState.audioInfo.startLoop / sampleRate;
-                const endLoopTime = audioState.audioInfo.endLoop / sampleRate;
+                const SAMPLE_RATE = 44100;
+                const startLoopTime = audioState.audioInfo.startLoop / SAMPLE_RATE;
+                const endLoopTime = audioState.audioInfo.endLoop / SAMPLE_RATE;
                 const loopDuration = endLoopTime - startLoopTime;
                 
                 if (currentTime >= endLoopTime) {
