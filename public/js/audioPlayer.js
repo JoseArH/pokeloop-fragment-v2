@@ -85,7 +85,8 @@ function initAudioPlayer() {
         audioState.audioSource.connect(audioState.gainNode);
         
         if (audioState.audioInfo && audioState.audioInfo.startLoop && audioState.audioInfo.endLoop) {
-            const SAMPLE_RATE = 44100;
+            // Usar el sample rate del archivo de audio actual
+            const SAMPLE_RATE = audioState.audioInfo.samplingRate;
             
             const startLoopTime = audioState.audioInfo.startLoop / SAMPLE_RATE;
             const endLoopTime = audioState.audioInfo.endLoop / SAMPLE_RATE;
@@ -104,14 +105,15 @@ function initAudioPlayer() {
                     end: endLoopTime
                 },
                 duration: audioState.audioBuffer.duration,
-                sampleRate: SAMPLE_RATE
+                sampleRate: SAMPLE_RATE,
+                actualSampleRate: audioState.audioInfo.samplingRate
             });
         }
     
         audioState.startedAt = audioState.audioContext.currentTime - startTime;
         audioState.isPlaying = true;
         audioState.audioSource.start(0, startTime);
-
+    
         const playPauseButton = document.getElementById('play-pause-button');
         if (playPauseButton) {
             playPauseButton.textContent = '⏸';
@@ -128,7 +130,8 @@ function initAudioPlayer() {
             
             if (audioState.audioSource.loop && audioState.audioInfo && 
                 audioState.audioInfo.startLoop && audioState.audioInfo.endLoop) {
-                const SAMPLE_RATE = 44100;
+                // Usar el sample rate del archivo de audio actual
+                const SAMPLE_RATE = audioState.audioInfo.samplingRate;
                 const startLoopTime = audioState.audioInfo.startLoop / SAMPLE_RATE;
                 const endLoopTime = audioState.audioInfo.endLoop / SAMPLE_RATE;
                 const loopDuration = endLoopTime - startLoopTime;

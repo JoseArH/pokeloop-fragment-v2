@@ -1,11 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ADMIN</title>
     <link rel="stylesheet" href="/css/styles.css">
 </head>
+
 <body>
     <div id="app">
         <header>
@@ -23,6 +25,8 @@
                 <input type="text" id="game-name" placeholder="Juego" required>
                 <input type="number" id="upload-start-loop" placeholder="Inicio Loop">
                 <input type="number" id="upload-end-loop" placeholder="Fin Loop">
+                <input type="number" id="sample-rate" placeholder="Sample Rate" value="44100" min="8000" max="192000"
+                    step="100" required>
                 <button type="submit">Subir</button>
             </form>
         </div>
@@ -35,4 +39,5 @@
 
     <script src="/js/adminLoader.js"></script>
 </body>
+
 </html>

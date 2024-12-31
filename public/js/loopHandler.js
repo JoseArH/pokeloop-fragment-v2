@@ -2,17 +2,25 @@ function initLoopHandler() {
     const { elements, audioState } = window;
 
     function samplesToSeconds(samples, samplingRate) {
+        // Usar el sample rate del audio actual si no se proporciona uno
+        const currentSampleRate = samplingRate || 
+            (audioState.audioInfo ? audioState.audioInfo.samplingRate : 44100);
+        
         const safetyMargin = 0.05;
         const totalDuration = audioState.audioBuffer ? audioState.audioBuffer.duration : 0;
-        const calculatedTime = samples / samplingRate;
+        // Usar el sample rate correcto para el cálculo
+        const calculatedTime = samples / currentSampleRate;
         
         if (calculatedTime < safetyMargin) return safetyMargin;
         if (totalDuration - calculatedTime < safetyMargin) return totalDuration - safetyMargin;
         return calculatedTime;
     }
-
+    
     function secondsToSamples(seconds, samplingRate) {
-        return Math.round(seconds * samplingRate);
+        // Usar el sample rate del audio actual si no se proporciona uno
+        const currentSampleRate = samplingRate || 
+            (audioState.audioInfo ? audioState.audioInfo.samplingRate : 44100);
+        return Math.round(seconds * currentSampleRate);
     }
 
     function formatTimeRemaining(milliseconds) {

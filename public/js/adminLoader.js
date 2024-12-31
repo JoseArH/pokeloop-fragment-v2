@@ -19,6 +19,7 @@ function initAdminLoader() {
                         <div class="song-info">
                             <span class="song-name">${audio.name}</span>
                             <span class="game-name">${audio.game || 'Unknown Game'}</span>
+                            <span class="sample-rate">Sample Rate: ${audio.samplingRate} Hz</span>
                         </div>
                         <div class="song-actions">
                             <button class="delete-button" data-id="${audio.id}">Delete</button>
@@ -68,20 +69,41 @@ function initAdminLoader() {
     // Manejar subida de archivos
     uploadForm.addEventListener('submit', async (e) => {
         e.preventDefault();
+        
+        // Obtener los valores del formulario
+        const audioFile = document.getElementById('audio-file').files[0];
+        const songName = document.getElementById('song-name').value;
+        const gameName = document.getElementById('game-name').value;
+        const startLoop = document.getElementById('upload-start-loop').value;
+        const endLoop = document.getElementById('upload-end-loop').value;
+        const sampleRate = document.getElementById('sample-rate').value;
+
+        // Debug log
+        console.log('Form values:', {
+            songName,
+            gameName,
+            startLoop,
+            endLoop,
+            sampleRate
+        });
+
         const formData = new FormData();
-        formData.append('audioFile', document.getElementById('audio-file').files[0]);
-        formData.append('name', document.getElementById('song-name').value);
-        formData.append('game', document.getElementById('game-name').value);
-        formData.append('startLoop', document.getElementById('upload-start-loop').value);
-        formData.append('endLoop', document.getElementById('upload-end-loop').value);
+        formData.append('audioFile', audioFile);
+        formData.append('name', songName);
+        formData.append('game', gameName);
+        formData.append('startLoop', startLoop);
+        formData.append('endLoop', endLoop);
+        formData.append('samplingRate', sampleRate);
 
         try {
+            console.log('Sending sample rate:', sampleRate);
             const response = await fetch('/api/audio/upload', {
                 method: 'POST',
                 body: formData
             });
             
             const data = await response.json();
+            console.log('Upload response:', data);
             
             if (response.ok) {
                 alert('Audio uploaded successfully');

@@ -25,24 +25,24 @@ async function loadExistingAudioFiles() {
                         const fileStats = await statAsync(filePath);
                         const id = crypto.randomBytes(4).toString('hex');
                         
-                        // Verificar si el archivo ya existe en la base de datos
                         const existingAudio = await Audio.findOne({
                             where: { filePath: filePath }
                         });
 
                         if (!existingAudio) {
-                            const totalSamples = Math.floor(metadata.format.duration * metadata.format.sampleRate);
+                            const sampleRate = metadata.format.sampleRate || 44100;
+                            const totalSamples = Math.floor(metadata.format.duration * sampleRate);
                             await Audio.create({
                                 id,
                                 name: filename.replace('.mp3', ''),
                                 game: 'Unknown Game',
                                 filePath: filePath,
-                                samplingRate: metadata.format.sampleRate,
+                                samplingRate: sampleRate,
                                 duration: metadata.format.duration,
                                 bitrate: metadata.format.bitrate,
                                 fileSize: fileStats.size,
                                 startLoop: 0,
-                                endLoop: Math.floor(totalSamples * 0.95) // 95% de la duración total
+                                endLoop: Math.floor(totalSamples * 0.95)
                             });
                         }
                     } catch (error) {
@@ -66,21 +66,42 @@ exports.processUploadedAudio = async (file, body) => {
         const fileStats = await statAsync(filePath);
         const id = crypto.randomBytes(4).toString('hex');
         
-        const totalSamples = Math.floor(metadata.format.duration * metadata.format.sampleRate);
+        // Debug logs
+        console.log('Received sampling rate from form:', body.samplingRate);
+        console.log('File metadata sampling rate:', metadata.format.sampleRate);
+
+        // Usar el samplerate proporcionado o el detectado del archivo
+        const samplingRate = body.samplingRate ? 
+            parseInt(body.samplingRate) : 
+            metadata.format.sampleRate;
+
+        console.log('Final sampling rate to be used:', samplingRate);
+
+        // Calcular totalSamples usando el samplingRate correcto
+        const totalSamples = Math.floor(metadata.format.duration * samplingRate);
         const defaultEndLoop = Math.floor(totalSamples * 0.95);
+
+        // Debug log para los puntos de loop
+        console.log('Total samples:', totalSamples);
+        console.log('Default end loop:', defaultEndLoop);
+        console.log('Provided start loop:', body.startLoop);
+        console.log('Provided end loop:', body.endLoop);
 
         const audioInfo = await Audio.create({
             id,
             name: body.name || file.originalname.replace('.mp3', ''),
             game: body.game || 'Unknown Game',
             filePath: filePath,
-            samplingRate: metadata.format.sampleRate,
+            samplingRate: samplingRate,
             duration: metadata.format.duration,
             bitrate: metadata.format.bitrate,
             fileSize: fileStats.size,
             startLoop: body.startLoop ? parseInt(body.startLoop) : 0,
             endLoop: body.endLoop ? parseInt(body.endLoop) : defaultEndLoop
         });
+
+        // Debug log para la información guardada
+        console.log('Saved audio info:', audioInfo.toJSON());
 
         return audioInfo;
     } catch (error) {

@@ -32,7 +32,17 @@ exports.uploadAudio = [
                 return res.status(400).json({ error: 'No file uploaded' });
             }
 
-            const audioInfo = await audioService.processUploadedAudio(req.file, req.body);
+            console.log('Received form data:', req.body);
+            console.log('Sample rate from form:', req.body.samplingRate);
+
+            const audioData = {
+                ...req.body,
+                samplingRate: parseInt(req.body.samplingRate) || 44100
+            };
+
+            console.log('Processed audio data:', audioData);
+
+            const audioInfo = await audioService.processUploadedAudio(req.file, audioData);
             res.status(201).json(audioInfo);
         } catch (error) {
             console.error('Upload error:', error);
