@@ -24,6 +24,15 @@
                 <div id="player">
                     <div class="player-controls">
                         <div class="custom-controls">
+                            <div class="player-info">
+                                <div id="current-song-title">Selecciona una canción</div>
+                                <div id="error-message" style="color: red; display: none;"></div>
+                            </div>
+                            <div class="control-buttons">
+                                <button id="prev-button">⏮</button>
+                                <button id="next-button">⏭</button>
+                                <button id="shuffle-button">🔀</button>
+                            </div>
                             <input type="range" id="time-slider" value="0" step="0.1">
                             <div id="time-display">
                                 <span id="current-time">0:00</span> / <span id="total-time">0:00</span>
@@ -74,7 +83,7 @@
     <script src="/js/audioLoader.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            // Inicializar el manejador del loop después de que todo esté cargado
+            console.log('Initializing with shuffle mode:', window.audioState?.isShuffleMode);
             if(window.initLoopHandler) {
                 window.initLoopHandler();
             }

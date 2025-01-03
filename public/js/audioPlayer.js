@@ -1,7 +1,23 @@
+// Inicializar audioPlayerFunctions al principio
 window.audioPlayerFunctions = {
     loadAudio: null,
     startPlayback: null,
     pausePlayback: null
+};
+
+// Inicializar audioState si no existe
+window.audioState = window.audioState || {
+    audioContext: null,
+    audioBuffer: null,
+    audioSource: null,
+    gainNode: null,
+    isPlaying: false,
+    startedAt: 0,
+    pausedAt: 0,
+    isDraggingSlider: false,
+    currentAudioId: null,
+    audioInfo: null,
+    isShuffleMode: false
 };
 
 function initAudioPlayer() {
@@ -40,6 +56,11 @@ function initAudioPlayer() {
             const info = await infoResponse.json();
             console.log('Audio info received:', info);
             
+            // Actualizar el título utilizando el nombre de la canción
+            const title = info.name || info.title || 'Canción sin título';
+            console.log('Updating song title to:', title);
+            updateSongTitle(`${title} - ${info.game || 'Juego desconocido'}`);
+
             const audioResponse = await fetch(`/api/audio/${id}/stream`);
             if (!audioResponse.ok) throw new Error('Failed to fetch audio stream');
             const arrayBuffer = await audioResponse.arrayBuffer();
@@ -68,10 +89,11 @@ function initAudioPlayer() {
 
         } catch (error) {
             console.error('Error loading audio:', error);
+            updateSongTitle('Error al cargar la canción');
             throw error;
         }
-    }
 
+    }
     function startPlayback(startTime = 0) {
         if (!audioState.audioBuffer) return;
     
@@ -150,6 +172,70 @@ function initAudioPlayer() {
         requestAnimationFrame(updateVisualInterface);
     }
 
+function updateSongTitle(title) {
+    const titleElement = document.getElementById('current-song-title');
+    if (titleElement) {
+        titleElement.textContent = title || 'No hay canción seleccionada';
+    }
+}
+
+function setupNavigationControls() {
+    const prevButton = document.getElementById('prev-button');
+    const nextButton = document.getElementById('next-button');
+    const shuffleButton = document.getElementById('shuffle-button');
+    
+    // Inicializar el estado de aleatorización
+    if (typeof window.audioState.isShuffleMode === 'undefined') {
+        window.audioState.isShuffleMode = false;
+    }
+
+    function updateShuffleButtonState() {
+        if (shuffleButton) {
+            shuffleButton.style.color = window.audioState.isShuffleMode ? '#ff4444' : '#000000';
+            shuffleButton.classList.toggle('active', window.audioState.isShuffleMode);
+            console.log('Shuffle button updated:', window.audioState.isShuffleMode);
+        }
+    }
+
+    if (prevButton) {
+        prevButton.addEventListener('click', () => {
+            const songList = Array.from(document.querySelectorAll('#song-list .song-item'));
+            if (!songList.length) return;
+
+            let currentIndex = -1;
+            songList.forEach((song, index) => {
+                if (song.classList.contains('selected')) {
+                    currentIndex = index;
+                }
+            });
+
+            const prevIndex = currentIndex <= 0 ? songList.length - 1 : currentIndex - 1;
+            songList[prevIndex].click();
+        });
+    }
+
+    if (nextButton) {
+        nextButton.addEventListener('click', () => {
+            console.log('Next button clicked - Current shuffle state:', window.audioState.isShuffleMode);
+            if (window.loopHandlerFunctions) {
+                window.loopHandlerFunctions.playNextSong();
+            }
+        });
+    }
+
+    if (shuffleButton) {
+        // Establecer estado inicial del botón
+        updateShuffleButtonState();
+
+        shuffleButton.addEventListener('click', () => {
+            window.audioState.isShuffleMode = !window.audioState.isShuffleMode;
+            updateShuffleButtonState();
+            console.log('Shuffle mode toggled to:', window.audioState.isShuffleMode);
+        });
+    }
+}
+
+
     function setupVolumeControls() {
         const volumeSlider = document.getElementById('volume-slider');
         const playlistVolumeSlider = document.getElementById('playlist-volume');
@@ -223,6 +309,8 @@ function initAudioPlayer() {
     window.audioPlayerFunctions.pausePlayback = pausePlayback;
 
     setupVolumeControls();
+    setupNavigationControls(); // Añadir esta línea
+
 }
 
 document.addEventListener('DOMContentLoaded', initAudioPlayer);

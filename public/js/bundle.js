@@ -1,4 +1,4 @@
-// Estado global de la aplicación
+// Inicializaciones globales
 window.audioState = {
     currentAudioId: null,
     audioInfo: null,
@@ -11,13 +11,11 @@ window.audioState = {
     isPlaying: false,
     isDraggingSlider: false,
     isShuffleMode: false,
-    // Timer states
     timerInterval: null,
     timerStartTime: null,
     timerDuration: null
 };
 
-// Referencias a elementos del DOM
 window.elements = {
     audioPlayer: null,
     timeSlider: null,
@@ -30,12 +28,18 @@ window.elements = {
     songList: null
 };
 
-// Asegurarnos de que audioPlayerFunctions existe
-window.audioPlayerFunctions = window.audioPlayerFunctions || {
+window.audioPlayerFunctions = {
     loadAudio: null,
     startPlayback: null,
     pausePlayback: null
 };
+
+// Importar todas las funcionalidades
+function initializeAll() {
+    initAudioPlayer();
+    initLoopHandler();
+    initAudioLoader();
+}
 
 document.addEventListener('DOMContentLoaded', () => {
     try {
@@ -52,15 +56,11 @@ document.addEventListener('DOMContentLoaded', () => {
             songList: document.getElementById('song-list')
         };
 
-        console.log('Elements initialized:', window.elements);
-        console.log('Audio state initialized:', window.audioState);
-        console.log('Audio functions initialized:', window.audioPlayerFunctions);
-
-        // Inicializar manejadores
-        if (window.initLoopHandler) {
-            window.initLoopHandler();
-        }
+        initializeAll();
     } catch (error) {
-        console.error('Error in main.js initialization:', error);
+        console.error('Error in initialization:', error);
     }
 });
+
+// Aquí copiar todo el contenido de audioPlayer.js, loopHandler.js y audioLoader.js
+// (sin sus propios event listeners de DOMContentLoaded)

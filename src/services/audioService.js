@@ -113,12 +113,26 @@ exports.processUploadedAudio = async (file, body) => {
 exports.getAudioInfo = async (id) => {
     try {
         const audioInfo = await Audio.findByPk(id);
-        return audioInfo;
+        if (audioInfo) {
+            // Asegurarnos de que devolvemos toda la información necesaria
+            return {
+                id: audioInfo.id,
+                title: audioInfo.name, // Importante: usar el nombre como título
+                name: audioInfo.name,
+                game: audioInfo.game,
+                samplingRate: audioInfo.samplingRate,
+                duration: audioInfo.duration,
+                startLoop: audioInfo.startLoop,
+                endLoop: audioInfo.endLoop
+            };
+        }
+        return null;
     } catch (error) {
         console.error('Error getting audio info:', error);
         return null;
     }
 };
+
 
 exports.getAllAudioInfo = async () => {
     try {
