@@ -30,47 +30,47 @@ function initLoopHandler() {
         return `${minutes}:${seconds.toString().padStart(2, '0')}`;
     }
 
-function playNextSong(shuffle = false) {
-    const songList = Array.from(document.querySelectorAll('#song-list .song-item'));
-    if (!songList.length) return false;
+    function playNextSong(shuffle = false) {
+        const songList = Array.from(document.querySelectorAll('#song-list .song-item'));
+        if (!songList.length) return false;
 
-    let currentIndex = -1;
-    songList.forEach((song, index) => {
-        if (song.classList.contains('selected')) {
-            currentIndex = index;
+        let currentIndex = -1;
+        songList.forEach((song, index) => {
+            if (song.classList.contains('selected')) {
+                currentIndex = index;
+            }
+        });
+
+        // Usar una variable local para el modo aleatorio
+        const shouldShuffle = window.audioState.isShuffleMode;
+        console.log('PlayNextSong called - Global shuffle mode:', shouldShuffle);
+
+        let nextIndex;
+        if (shouldShuffle) {
+            // Crear un array de índices disponibles (excluyendo el actual)
+            const availableIndices = Array.from(
+                { length: songList.length },
+                (_, i) => i
+            ).filter(i => i !== currentIndex);
+
+            // Seleccionar un índice aleatorio de los disponibles
+            const randomPosition = Math.floor(Math.random() * availableIndices.length);
+            nextIndex = availableIndices[randomPosition];
+
+            console.log('Shuffle mode - Available indices:', availableIndices, 'Selected:', nextIndex);
+        } else {
+            nextIndex = (currentIndex + 1) % songList.length;
+            console.log('Sequential mode - Next index:', nextIndex);
         }
-    });
 
-    // Usar una variable local para el modo aleatorio
-    const shouldShuffle = window.audioState.isShuffleMode;
-    console.log('PlayNextSong called - Global shuffle mode:', shouldShuffle);
-
-    let nextIndex;
-    if (shouldShuffle) {
-        // Crear un array de índices disponibles (excluyendo el actual)
-        const availableIndices = Array.from(
-            { length: songList.length }, 
-            (_, i) => i
-        ).filter(i => i !== currentIndex);
-
-        // Seleccionar un índice aleatorio de los disponibles
-        const randomPosition = Math.floor(Math.random() * availableIndices.length);
-        nextIndex = availableIndices[randomPosition];
-        
-        console.log('Shuffle mode - Available indices:', availableIndices, 'Selected:', nextIndex);
-    } else {
-        nextIndex = (currentIndex + 1) % songList.length;
-        console.log('Sequential mode - Next index:', nextIndex);
+        const nextSong = songList[nextIndex];
+        if (nextSong) {
+            console.log(`Playing song ${nextIndex} (${shouldShuffle ? 'shuffle' : 'sequential'} mode)`);
+            nextSong.click();
+            return true;
+        }
+        return false;
     }
-
-    const nextSong = songList[nextIndex];
-    if (nextSong) {
-        console.log(`Playing song ${nextIndex} (${shouldShuffle ? 'shuffle' : 'sequential'} mode)`);
-        nextSong.click();
-        return true;
-    }
-    return false;
-}
 
 
     function checkAndUpdateTimer() {
@@ -106,6 +106,13 @@ function playNextSong(shuffle = false) {
         // Configurar nuevo timer
         const minutes = parseInt(elements.timerSelect.value);
         audioState.timerDuration = minutes * 60 * 1000; // Convertir a milisegundos
+
+        // Use the remaining time if available
+        if (audioState.timerRemaining) {
+            audioState.timerDuration = audioState.timerRemaining;
+            audioState.timerRemaining = null;
+        }
+
         audioState.timerStartTime = Date.now();
 
         // Iniciar intervalo de actualización
@@ -118,6 +125,13 @@ function playNextSong(shuffle = false) {
             clearInterval(audioState.timerInterval);
             audioState.timerInterval = null;
         }
+
+        // Save the remaining time
+        if (audioState.timerStartTime && audioState.timerDuration) {
+            const elapsed = Date.now() - audioState.timerStartTime;
+            audioState.timerRemaining = audioState.timerDuration - elapsed;
+        }
+
         audioState.timerStartTime = null;
         audioState.timerDuration = null;
 
